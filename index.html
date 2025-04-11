@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="public/styles/index.css">
+  <title>DEVYIOS Donut</title>
+  <style>
+    body { 
+      margin: 0; 
+      overflow: hidden; 
+      background: #000; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    // Configuración de la escena
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+    
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 10;
+    
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Función para crear la textura del texto cuando las fuentes estén cargadas
+    async function createTorusWithText() {
+      // Asegurar que la fuente esté cargada
+      await document.fonts.load('800 10px "Syne"');
+      
+      // Crear un canvas grande para la textura
+      const canvas = document.createElement('canvas');
+      canvas.width = 2048;
+      canvas.height = 1024;
+      const ctx = canvas.getContext('2d');
+      
+      // Fondo negro
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Configurar el texto
+      const text = 'DEVYIOS';
+      ctx.font = '800 200px Syne';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textBaseline = 'middle';
+      
+      // Crear un efecto similar al de la imagen de referencia
+      // Primero dibujamos un borde rojo sutil para simular aberración cromática
+      ctx.shadowColor = '#26e2ff';
+      ctx.shadowBlur = 5;
+      ctx.shadowOffsetX = 3;
+      ctx.shadowOffsetY = 0;
+      
+      // Medir el texto para espaciado adecuado
+      const textWidth = ctx.measureText(text).width;
+      const spacing = textWidth * 1.03; // Reducimos el espaciado para más densidad
+      const rows = 7;
+      
+      // Dibujar el texto en un patrón que llene toda la superficie
+      for (let row = 0; row < rows; row++) {
+        const y = (canvas.height / rows) * (row + 0.5);
+        
+        // Desplazamiento alternado para cada fila
+        const rowOffset = (row % 2) * (spacing / 2);
+        
+        // Dibujamos el texto repetidamente en cada fila
+        for (let i = -1; i < (canvas.width / spacing) + 1; i++) {
+          const x = (i * spacing) + rowOffset;
+          ctx.fillText(text, x, y);
+        }
+      }
+      
+      // Ahora dibujamos un borde azul sutil para completar el efecto
+      ctx.shadowColor = '#dd00ff';
+      ctx.shadowBlur = 5;
+      ctx.shadowOffsetX = -3;
+      ctx.shadowOffsetY = 0;
+      
+      // Repetimos el dibujo para el efecto de borde azul
+      for (let row = 0; row < rows; row++) {
+        const y = (canvas.height / rows) * (row + 0.5);
+        const rowOffset = (row % 2) * (spacing / 2);
+        
+        for (let i = -1; i < (canvas.width / spacing) + 1; i++) {
+          const x = (i * spacing) + rowOffset;
+          ctx.fillText(text, x, y);
+        }
+      }
+      
+      // Crear la textura de Three.js
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      
+      // Geometría del toro más achatada como en la imagen de referencia
+      const geometry = new THREE.TorusGeometry(3.5, 1.7, 96, 384);
+      
+      // Ajuste de coordenadas UV para distribuir el texto correctamente
+      const uvs = geometry.attributes.uv;
+      for (let i = 0; i < uvs.count; i++) {
+        const u = uvs.getX(i);
+        const v = uvs.getY(i);
+        
+        // Estos multiplicadores controlan la densidad del texto
+        uvs.setXY(i, u * 2.5, v * 1.2);
+      }
+      uvs.needsUpdate = true;
+      
+      // Material simple
+      const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.DoubleSide
+      });
+      
+      const torus = new THREE.Mesh(geometry, material);
+      // Rotar para que se vea similar a la imagen de referencia
+      torus.rotation.x = 0.2;
+      torus.rotation.y = -0.4;
+      scene.add(torus);
+      
+      // Animar la dona
+      function animate() {
+        requestAnimationFrame(animate);
+        
+        // Rotación lenta para ver el efecto completo
+        torus.rotation.y += 0.003;
+        torus.rotation.x += 0.001;
+        
+        texture.offset.y -= 0.0005;
+        
+        renderer.render(scene, camera);
+      }
+      
+      animate();
+    }
+
+    createTorusWithText();
+    
+    // Ajustar al tamaño de la ventana
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

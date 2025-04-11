@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="public/styles/index.css">
+  <title>DEVYIOS Donut</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #000; }
+    canvas { display: flex; justify-content: center; align-items: center; margin-top: -90px;}
+  </style>
+</head>
+<body>
+  
+    <header>
+        <img src="public\img\logo\LogoDevyioLow.webp" alt="" style="margin: 2px; margin-top: 10px; width: 5rem;">
+        <nav style="color: whitesmoke;">
+            <ul style="list-style: none; font-weight: 600; font-size: 18pt;">
+                <li>Inicio</li>
+                <li>Servicios</li>
+                <li class="btn_contact">Contacto</li>
+                <li class="btn_login">Login</li>
+            </ul>
+        </nav>
+    </header>
+  
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js"
+      }
+    }
+    </script>
+
+    <script type="module">
+    import * as THREE from 'three';
+
+    const scene = new THREE.Scene();
+
+    // No se establece un color de fondo en la escena para transparencia
+    // scene.background = null; // O simplemente no se asigna nada
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
+    camera.position.z = 15;
+
+    const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true // Habilita el soporte para el búfer alfa (transparencia)
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 0); // Establece el color de limpieza a negro con alfa 0 (transparente)
+    document.body.appendChild(renderer.domElement);
+
+    // Ejecutar después de cargar la fuente
+    function init() {
+        // Canvas de alta resolución
+        const canvas = document.createElement('canvas');
+        canvas.width = 4096;
+        canvas.height = 1024;
+        const ctx = canvas.getContext('2d');
+        
+        // Fondo negro
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Texto y estilo
+        const text = 'DEVYIOS';
+        ctx.font = '800 180px "Syne"';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Efecto de aberración cromática
+        ctx.shadowBlur = 15;
+        
+        // Calculamos dimensiones exactas
+        const textWidth = ctx.measureText(text).width;
+        const horizontalSpacing = textWidth * 1.090; // Espacio entre textos horizontales
+        const rowCount = 7; // Número de filas
+        const rowHeight = canvas.height / rowCount;
+        
+        // Aplicar efecto cyan
+        ctx.shadowColor = '#26e2ff';
+        ctx.shadowOffsetX = 3;
+        ctx.shadowOffsetY = 0;
+        
+        // Dibujamos filas de texto con desplazamiento alternado
+        for (let row = 0; row < rowCount; row++) {
+        const y = rowHeight * (row + 0.5);
+        // Desplazamiento horizontal alternado para mejor distribución
+        const xOffset = (row % 2) ? horizontalSpacing / 2 : 0;
+        
+        // Calcular cuántas repeticiones necesitamos
+        const repetitions = Math.ceil(canvas.width / horizontalSpacing) + 1;
+        
+        // Dibujar el texto repetidamente en cada fila
+        for (let i = 0; i < repetitions; i++) {
+            const x = (i * horizontalSpacing) + xOffset;
+            ctx.fillText(text, x, y);
+        }
+        }
+        
+        // Aplicar efecto magenta
+        ctx.shadowColor = '#dd00ff';
+        ctx.shadowOffsetX = -3;
+        ctx.shadowOffsetY = 0;
+        
+        // Repetir el dibujo para el efecto magenta
+        for (let row = 0; row < rowCount; row++) {
+        const y = rowHeight * (row + 0.5);
+        const xOffset = (row % 2) ? horizontalSpacing / 2 : 0;
+        
+        const repetitions = Math.ceil(canvas.width / horizontalSpacing) + 1;
+        
+        for (let i = 0; i < repetitions; i++) {
+            const x = (i * horizontalSpacing) + xOffset;
+            ctx.fillText(text, x, y);
+        }
+        }
+        
+        // Crear la textura
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        
+        // Esto es crucial: no repetir la textura, usarla una sola vez
+        texture.repeat.set(1, 1);
+        
+        // Geometría del toro con más segmentos para mejor calidad
+        // La clave está en los tubularSegments, que determina cómo se envuelve la textura
+        const geometry = new THREE.TorusGeometry(5, 2, 96, 500);
+        
+        // Ajustar UV mapping manualmente para garantizar una distribución perfecta
+        const uvAttribute = geometry.attributes.uv;
+        
+        for (let i = 0; i < uvAttribute.count; i++) {
+        // Obtener las coordenadas UV actuales
+        let u = uvAttribute.getX(i);
+        let v = uvAttribute.getY(i);
+        
+        // Escalar para que el texto se distribuya correctamente
+        // Estos valores son críticos para evitar cortes y distribuir bien el texto
+        u = u * 2;  // Controla cuántas repeticiones horizontales
+        v = v * 2;  // Controla cuántas repeticiones verticales
+        
+        // Guardar las nuevas coordenadas UV
+        uvAttribute.setXY(i, u, v);
+        }
+        
+        uvAttribute.needsUpdate = true;
+        
+        // Crear material y aplicar la textura
+        const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.DoubleSide
+        });
+        
+        const torus = new THREE.Mesh(geometry, material);
+        torus.rotation.x = 0.2;
+        scene.add(torus);
+        
+        // Animación
+        function animate() {
+        requestAnimationFrame(animate);
+        
+        // Desplazamiento suave del texto
+        texture.offset.y -= 0.0009;
+        
+        // Rotación suave para ver todo el toro
+        torus.rotation.y += 0.002;
+        torus.rotation.x += 0.001;
+        
+        renderer.render(scene, camera);
+        }
+        
+        animate();
+    }
+
+    // Para asegurarse de que todo se cargue correctamente
+    window.addEventListener('load', init);
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    </script>
+
+</body>
+</html>
