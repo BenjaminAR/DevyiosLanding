@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animación de Logo 3D</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000000;
+        }
+        canvas {
+            display: block;
+        }
+        #info {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: #555;
+            font-family: Arial, sans-serif;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">Mueve el mouse/toca la pantalla para interactuar | Rueda del mouse para zoom</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+
+    <script>
+        // Configuración básica
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
+        
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 15);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+        
+        // Iluminación
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(10, 10, 10);
+        scene.add(directionalLight);
+        
+        const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight2.position.set(-5, -5, 8);
+        scene.add(directionalLight2);
+        
+        // Colores del logo basados en la imagen
+        const colors = {
+            lightBlue: 0x00b8e0,     // Azul claro superior
+            darkBlue: 0x00567a,      // Azul oscuro izquierdo
+            mediumBlue: 0x0097c0,    // Azul medio frontal
+            lightCyan: 0x70d3e2,     // Azul cyan inferior
+            lightGray: 0xe1e1df,      // Gris claro derecho
+            opacityBlue: 0x006594,    //Azul panel anbjo izq
+        };
+        
+        // Grupo principal para el logo
+        const logoGroup = new THREE.Group();
+        scene.add(logoGroup);
+
+// Función mejorada para crear una forma con todas las esquinas redondeadas sin deformaciones
+function createRoundedShape(points, cornerRadius) {
+    const shape = new THREE.Shape();
+    
+    if (points.length < 3) return shape;
+    
+    // Para cada punto, calculamos la dirección hacia y desde ese punto
+    const smoothedPoints = [];
+    
+    for (let i = 0; i < points.length; i++) {
+        const current = points[i];
+        const prev = points[(i - 1 + points.length) % points.length];
+        const next = points[(i + 1) % points.length];
+        
+        // Vectores de dirección
+        const fromPrev = {
+            x: current.x - prev.x,
+            y: current.y - prev.y
+        };
+        
+        const toNext = {
+            x: next.x - current.x,
+            y: next.y - current.y
+        };
+        
+        // Normalizar vectores
+        const lenFromPrev = Math.sqrt(fromPrev.x * fromPrev.x + fromPrev.y * fromPrev.y);
+        fromPrev.x /= lenFromPrev;
+        fromPrev.y /= lenFromPrev;
+        
+        const lenToNext = Math.sqrt(toNext.x * toNext.x + toNext.y * toNext.y);
+        toNext.x /= lenToNext;
+        toNext.y /= lenToNext;
+        
+        // Limitar el radio de esquina al 40% de la longitud del segmento más corto
+        // para evitar deformaciones en segmentos cortos
+        const actualRadius = Math.min(
+            cornerRadius,
+            lenFromPrev * 0.4,
+            lenToNext * 0.4
+        );
+        
+        // Puntos de control para esta esquina
+        smoothedPoints.push({
+            point: current,
+            fromPrevPoint: {
+                x: current.x - fromPrev.x * actualRadius,
+                y: current.y - fromPrev.y * actualRadius
+            },
+            toNextPoint: {
+                x: current.x + toNext.x * actualRadius,
+                y: current.y + toNext.y * actualRadius
+            },
+            radius: actualRadius
+        });
+    }
+    
+    // Mover al primer punto de inicio (fin del redondeo del último punto)
+    shape.moveTo(smoothedPoints[0].fromPrevPoint.x, smoothedPoints[0].fromPrevPoint.y);
+    
+    // Dibujar todas las curvas y líneas
+    for (let i = 0; i < smoothedPoints.length; i++) {
+        const current = smoothedPoints[i];
+        const next = smoothedPoints[(i + 1) % smoothedPoints.length];
+        
+        // Curva en la esquina actual
+        shape.quadraticCurveTo(
+            current.point.x, current.point.y,
+            current.toNextPoint.x, current.toNextPoint.y
+        );
+        
+        // Línea recta hasta la siguiente curva
+        shape.lineTo(next.fromPrevPoint.x, next.fromPrevPoint.y);
+    }
+    
+    return shape;
+}
+        // Función para crear geometrías de panel con bordes redondeados
+        function createPanelGeometry(points, depth, cornerRadius) {
+            const shape = createRoundedShape(points, cornerRadius);
+            
+            return new THREE.ExtrudeGeometry(shape, {
+                depth: depth,
+                bevelEnabled: false
+            });
+        }
+
+        // Crear paneles con geometrías precisas y esquinas redondeadas
+        // Panel superior azul claro
+        const topPanelPoints = [
+            { x: - .5 , y: 3.5 },     // Centro superior
+            { x: -2.6, y: 2.5 },    // Izquierda
+            { x: -.5, y: 1.7 },  // Centro inferior
+            { x: 1, y: 3 }      // Derecha
+        ];
+        const topPanelGeometry = createPanelGeometry(topPanelPoints, 0.5, 0.3);
+        const topPanelMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.lightBlue,
+            flatShading: false,
+            shininess: 80
+        });
+        
+        const topPanel = new THREE.Mesh(topPanelGeometry, topPanelMaterial);
+        topPanel.position.z = -0.7;
+        // Ajustar posición para crear separación
+        topPanel.position.y = 0.1;
+        logoGroup.add(topPanel);
+        
+        // Panel izquierdo azul oscuro leftPaneldonw
+        const leftPaneldonwPoints = [
+            
+                { x: 2.4, y: 0.8 },
+                { x: 2.4, y: 5.6 },
+                { x: 0.8, y: 2 },
+                { x: 0.5, y: 1.5 }      
+
+        ];
+        const leftPaneldonwGeometry = createPanelGeometry(leftPaneldonwPoints, 0.5, 0.3);
+        const leftPaneldonwMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.opacityBlue,
+            flatShading: false,
+            shininess: 50
+        });
+        const leftPaneldonw = new THREE.Mesh(leftPaneldonwGeometry, leftPaneldonwMaterial);
+        leftPaneldonw.position.z = -0.7;
+        // Ajustar posición para crear separación
+        leftPaneldonw.position.x = -3.1;
+        leftPaneldonw.position.y = -4.1;
+        logoGroup.add(leftPaneldonw);
+
+        // Panel izquierdo azul oscuro
+        const leftPanelPoints = [
+            { x: -2.4, y: -0.8 },    // Superior
+            { x: -2.4, y: -5.6 }, // Inferior
+            { x: - .8, y: -2 },    // Centro inferior
+            { x: - .5, y: -1.5 }   // Centro superior
+        ];
+        const leftPanelGeometry = createPanelGeometry(leftPanelPoints, 0.5, 0.3);
+        const leftPanelMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.darkBlue,
+            flatShading: false,
+            shininess: 50
+        });
+        const leftPanel = new THREE.Mesh(leftPanelGeometry, leftPanelMaterial);
+        leftPanel.position.z = -0.7;
+        // Ajustar posición para crear separación
+        leftPanel.position.x = -0.2;
+        leftPanel.position.y = 3;
+        logoGroup.add(leftPanel);
+
+        // Panel frontal azul medio
+        const frontPanelPoints = [
+            { x: 1.8, y: - 0.1 },  // Superior
+            { x: 1.75, y: - 4.9 },    // Medio superior
+            { x: 2.6, y: - 5.4 },    // Inferior
+            { x: 3.5, y: - 4.9 },  // Derecha inferior
+            { x: 3.5, y: 1.5 }      // Derecha superior
+        ];
+        const frontPanelGeometry = createPanelGeometry(frontPanelPoints, 0.4, 0.3);
+        const frontPanelMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.mediumBlue,
+            flatShading: false,
+            shininess: 50
+        });
+        const frontPanel = new THREE.Mesh(frontPanelGeometry, frontPanelMaterial);
+        // Ajustar posición para crear separación
+        
+        frontPanel.position.x = -2.1;
+        frontPanel.position.z = -0.7;
+        frontPanel.position.y = 1.5;
+        logoGroup.add(frontPanel);
+
+        // Panel derecho gris claro
+        const rightPanelPoints = [
+            { x: 1.8, y: 3 },     // Superior izquierda
+            { x: 1.8, y: -1 },    // Inferior izquierda
+            { x: 3.5, y: -2 },  // Inferior derecha
+            { x: 3.5, y: 1.5 }  // Superior derecha
+        ];
+        const rightPanelGeometry = createPanelGeometry(rightPanelPoints, 0.4, 0.3);
+        const rightPanelMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.lightGray,
+            flatShading: false,
+            shininess: 50
+        });
+        const rightPanel = new THREE.Mesh(rightPanelGeometry, rightPanelMaterial);
+        rightPanel.position.z = -0.7;
+        // Ajustar posición para crear separación
+        rightPanel.position.x = 0.2; //panel blanco derecho
+        logoGroup.add(rightPanel);
+        
+        // Panel inferior azul cyan
+        const bottomPanelPoints = [
+            { x: 1.4, y: -3.2 },    // Izquierda superior
+            { x: 1.4, y: -1.9 },    // Izquierda inferior
+            { x: 1.4, y: -1 },     // Centro
+            { x: 3.4, y: -2.2 }     // Derecha
+        ];
+        
+        const bottomPanelGeometry = createPanelGeometry(bottomPanelPoints, 0.4, 0.3);
+        const bottomPanelMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.lightCyan,
+            flatShading: false,
+            shininess: 50   
+        });
+        
+        const bottomPanel = new THREE.Mesh(bottomPanelGeometry, bottomPanelMaterial);
+        bottomPanel.position.z = -0.7;
+        // Ajustar posición para crear separación
+        bottomPanel.position.y = -0.15;
+        logoGroup.add(bottomPanel);
+        
+        // Ajustes finales de posición y rotación
+        logoGroup.position.y = 1;
+        logoGroup.rotation.x = -0.1;
+        
+        // Animación de entrada
+        logoGroup.scale.set(0, 0, 0);
+        gsap.to(logoGroup.scale, {
+            x: 1, 
+            y: 1, 
+            z: 1, 
+            duration: 1.2, 
+            ease: "back.out(1.7)",
+            onComplete: () => {
+                gsap.to(logoGroup.rotation, {
+                    y: Math.PI * 2,
+                    duration: 2.5,
+                    ease: "power1.inOut"
+                });
+            }
+        });
+        
+        // Variables para interactividad
+        let isDragging = false;
+        let previousMousePosition = {
+            x: 0,
+            y: 0
+        };
+        
+        // Eventos del mouse
+        document.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousMousePosition = {
+                x: e.clientX,
+                y: e.clientY
+            };
+        }, false);
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaMove = {
+                    x: e.clientX - previousMousePosition.x,
+                    y: e.clientY - previousMousePosition.y
+                };
+                
+                logoGroup.rotation.y += deltaMove.x * 0.01;
+                logoGroup.rotation.x += deltaMove.y * 0.01;
+                
+                previousMousePosition = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+            }
+        }, false);
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        }, false);
+        
+        // Zoom con rueda de ratón
+        document.addEventListener('wheel', (e) => {
+            camera.position.z += e.deltaY * 0.01;
+            // Limitar el zoom
+            if (camera.position.z < 8) camera.position.z = 8;
+            if (camera.position.z > 20) camera.position.z = 20;
+        }, false);
+        
+        // Eventos táctiles para dispositivos móviles
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                previousMousePosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            }
+        }, false);
+        
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging && e.touches.length === 1) {
+                const deltaMove = {
+                    x: e.touches[0].clientX - previousMousePosition.x,
+                    y: e.touches[0].clientY - previousMousePosition.y
+                };
+                
+                logoGroup.rotation.y += deltaMove.x * 0.01;
+                logoGroup.rotation.x += deltaMove.y * 0.01;
+                
+                previousMousePosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            }
+        }, false);
+        
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+        }, false);
+        
+        // Manejo de redimensionamiento
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }, false);
+        
+        // Rotación suave cuando no se interactúa
+        let autoRotate = true;
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (!isDragging && autoRotate) {
+                logoGroup.rotation.y += 0.003;
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // Después de la rotación inicial, habilitar/deshabilitar autorotación con clic/toque
+        setTimeout(() => {
+            document.addEventListener('click', () => {
+                autoRotate = !autoRotate;
+            });
+            document.addEventListener('touchstart', () => {
+                autoRotate = !autoRotate;
+            }, {passive: true});
+        }, 3500);
+    </script>
+
+
+
+</body>
+</html>

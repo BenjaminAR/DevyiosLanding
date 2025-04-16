@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSupport - Servicios</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Estilos compartidos */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(33, 37, 41, 0.97);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            width: 600px;
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #ffffff;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .close-modal:hover {
+            transform: rotate(90deg);
+        }
+
+        .services-list {
+            list-style: none;
+            padding: 1rem 0;
+        }
+
+        .services-list li {
+            margin: 1.5rem 0;
+            transition: transform 0.3s ease;
+        }
+
+        .services-list li:hover {
+            transform: translateY(-3px);
+        }
+
+        .services-list a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: 500;
+            display: block;
+            padding: 0.5rem 0;
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease;
+        }
+
+        .services-list a:hover {
+            color: #0d6efd;
+        }
+
+        .modal-title {
+            color: #ffffff;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* Contenido principal */
+        .main-content {
+            padding: 8rem 3rem 3rem;
+            min-height: 100vh;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #212529;
+        }
+
+        /* Animaciones para el modal */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .services-list li {
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        .services-list li:nth-child(1) { animation-delay: 0.1s; }
+        .services-list li:nth-child(2) { animation-delay: 0.2s; }
+        .services-list li:nth-child(3) { animation-delay: 0.3s; }
+        .services-list li:nth-child(4) { animation-delay: 0.4s; }
+        .services-list li:nth-child(5) { animation-delay: 0.5s; }
+        .services-list li:nth-child(6) { animation-delay: 0.6s; }
+
+        /* ===== ESTILOS PARA PANTALLAS GRANDES (> 819px) ===== */
+        @media (min-width: 820px) {
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1.5rem 3rem;
+                background-color: #ffffff;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+                position: fixed;
+                width: 100%;
+                z-index: 100;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #0d6efd;
+                text-decoration: none;
+            }
+
+            .navbar ul {
+                display: flex;
+                list-style: none;
+                gap: 2.5rem;
+            }
+
+            .navbar li a {
+                text-decoration: none;
+                color: #495057;
+                font-weight: 500;
+                transition: color 0.3s ease;
+                position: relative;
+                padding-bottom: 0.25rem;
+            }
+
+            .navbar li a:hover {
+                color: #0d6efd;
+            }
+
+            /* Efecto underline en los enlaces del menú al hover */
+            .navbar li a::after {
+                content: '';
+                position: absolute;
+                width: 0;
+                height: 2px;
+                bottom: 0;
+                left: 0;
+                background-color: #0d6efd;
+                transition: width 0.3s ease;
+            }
+
+            .navbar li a:hover::after {
+                width: 100%;
+            }
+
+            /* Ocultar elementos de móvil */
+            .menu-toggle {
+                display: none;
+            }
+
+            .mobile-header {
+                display: none;
+            }
+        }
+
+        /* ===== ESTILOS PARA PANTALLAS PEQUEÑAS (<= 819px) ===== */
+        @media (max-width: 819px) {
+            .header {
+                display: none;
+            }
+
+            .mobile-header {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding: 1.5rem 1rem;
+                background-color: #ffffff;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+                position: fixed;
+                width: 100%;
+                z-index: 100;
+            }
+
+            .logo {
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: #0d6efd;
+                text-decoration: none;
+                margin-bottom: 1rem;
+                letter-spacing: 1px;
+            }
+
+            /* Menú hamburguesa animado */
+            .menu-toggle {
+                background: none;
+                border: none;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                height: 24px;
+                position: relative;
+                width: 30px;
+                z-index: 200;
+                transition: all 0.3s ease;
+                padding: 0;
+            }
+
+            .menu-toggle:focus {
+                outline: none;
+            }
+
+            .menu-toggle span {
+                background-color: #0d6efd;
+                border-radius: 3px;
+                display: block;
+                height: 3px;
+                width: 100%;
+                transition: all 0.3s ease;
+            }
+
+            /* Animación del menú hamburguesa */
+            .menu-toggle.active span:nth-child(1) {
+                transform: translateY(10px) rotate(45deg);
+            }
+
+            .menu-toggle.active span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .menu-toggle.active span:nth-child(3) {
+                transform: translateY(-10px) rotate(-45deg);
+            }
+
+            /* Menú principal para móvil */
+            .main-menu {
+                list-style: none;
+                padding: 1rem 0 2rem;
+            }
+
+            .main-menu li {
+                margin: 1rem 0;
+                position: relative;
+                opacity: 0;
+                transform: translateY(20px);
+                transition: all 0.5s ease;
+            }
+
+            .mobile-modal.active .main-menu li {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            /* Efecto escalonado para la aparición de los items del menú */
+            .mobile-modal.active .main-menu li:nth-child(1) { transition-delay: 0.1s; }
+            .mobile-modal.active .main-menu li:nth-child(2) { transition-delay: 0.2s; }
+            .mobile-modal.active .main-menu li:nth-child(3) { transition-delay: 0.3s; }
+            .mobile-modal.active .main-menu li:nth-child(4) { transition-delay: 0.4s; }
+
+            .main-menu a {
+                color: #ffffff;
+                text-decoration: none;
+                font-size: 1.6rem;
+                font-weight: 500;
+                display: block;
+                padding: 0.5rem 0;
+                letter-spacing: 0.5px;
+                transition: color 0.3s ease;
+            }
+
+            .main-menu a:hover {
+                color: #0d6efd;
+            }
+
+            /* Submenú de servicios */
+            .services-submenu {
+                display: none;
+                list-style: none;
+                padding: 1rem 0;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.6s ease, padding 0.6s ease;
+            }
+
+            .services-submenu.open {
+                display: block;
+                max-height: 500px;
+                padding: 1rem 0;
+            }
+
+            .services-submenu li {
+                margin: 0.75rem 0;
+                opacity: 0;
+                transform: translateY(10px);
+                transition: all 0.5s ease;
+            }
+
+            .services-submenu.open li {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            /* Efecto escalonado para submenu */
+            .services-submenu.open li:nth-child(1) { transition-delay: 0.1s; }
+            .services-submenu.open li:nth-child(2) { transition-delay: 0.2s; }
+            .services-submenu.open li:nth-child(3) { transition-delay: 0.3s; }
+            .services-submenu.open li:nth-child(4) { transition-delay: 0.4s; }
+            .services-submenu.open li:nth-child(5) { transition-delay: 0.5s; }
+            .services-submenu.open li:nth-child(6) { transition-delay: 0.6s; }
+
+            .services-submenu a {
+                color: #adb5bd;
+                font-size: 1.2rem;
+                transition: color 0.3s ease, padding 0.3s ease;
+            }
+
+            .services-submenu a:hover {
+                color: #0d6efd;
+                padding-left: 5px;
+            }
+
+            /* Indicador de menú desplegable */
+            .dropdown-indicator {
+                margin-left: 0.5rem;
+                transition: transform 0.3s ease;
+                display: inline-block;
+            }
+
+            .dropdown-active .dropdown-indicator {
+                transform: rotate(180deg);
+            }
+
+            .mobile-modal .modal-title {
+                opacity: 0;
+                transform: translateY(20px);
+                transition: all 0.5s ease;
+            }
+
+            .mobile-modal.active .modal-title {
+                opacity: 1;
+                transform: translateY(0);
+                transition-delay: 0.05s;
+            }
+
+            /* Contenido principal ajustado para móvil */
+            .main-content {
+                padding: 7rem 1.5rem 2rem;
+                text-align: center;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header para pantallas grandes (> 819px) -->
+    <header class="header">
+        <a href="#" class="logo">TechSupport</a>
+        <nav class="navbar">
+            <ul>
+                <li><a href="#">Inicio</a></li>
+                <li><a href="#" id="servicios-btn-desktop">Servicios</a></li>
+                <li><a href="#">Sobre Nosotros</a></li>
+                <li><a href="#">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Modal para pantallas grandes -->
+    <div class="modal" id="servicios-modal">
+        <button class="close-modal" id="close-modal">&times;</button>
+        <div class="modal-content">
+            <h2 class="modal-title">Nuestros Servicios</h2>
+            <ul class="services-list">
+                <li><a href="#">Soporte Técnico</a></li>
+                <li><a href="#">Asesoría en Ciberseguridad</a></li>
+                <li><a href="#">Diseño Web</a></li>
+                <li><a href="#">Programación</a></li>
+                <li><a href="#">Automatización de Procesos Informáticos</a></li>
+                <li><a href="#">Encuestas</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Header para móvil (<= 819px) -->
+    <header class="mobile-header">
+        <a href="#" class="logo">TechSupport</a>
+        <button class="menu-toggle" id="menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    <!-- Modal para móvil -->
+    <div class="modal mobile-modal" id="mobile-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Menú</h2>
+            <ul class="main-menu">
+                <li><a href="#">Inicio</a></li>
+                <li><a href="#" id="servicios-btn-mobile">Servicios <i class="fas fa-chevron-down dropdown-indicator"></i></a>
+                    <ul class="services-submenu" id="services-submenu">
+                        <li><a href="#">Soporte Técnico</a></li>
+                        <li><a href="#">Asesoría en Ciberseguridad</a></li>
+                        <li><a href="#">Diseño Web</a></li>
+                        <li><a href="#">Programación</a></li>
+                        <li><a href="#">Automatización de Procesos</a></li>
+                        <li><a href="#">Encuestas</a></li>
+                    </ul>
+                </li>
+                <li><a href="#">Sobre Nosotros</a></li>
+                <li><a href="#">Contacto</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <h1 class="section-title">Bienvenido a nuestros servicios técnicos</h1>
+        <p>Somos especialistas en soluciones tecnológicas para empresas y particulares.</p>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del menú de escritorio
+            const serviciosBtnDesktop = document.getElementById('servicios-btn-desktop');
+            const serviciosModal = document.getElementById('servicios-modal');
+            const closeModal = document.getElementById('close-modal');
+            
+            // Elementos del menú móvil
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileModal = document.getElementById('mobile-modal');
+            const serviciosBtnMobile = document.getElementById('servicios-btn-mobile');
+            const servicesSubmenu = document.getElementById('services-submenu');
+            
+            // Comprobar el tamaño de la pantalla
+            const checkScreenSize = function() {
+                return window.innerWidth > 819;
+            };
+            
+            // Funcionalidad para pantallas grandes
+            serviciosBtnDesktop.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (checkScreenSize()) {
+                    serviciosModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+            
+            closeModal.addEventListener('click', function() {
+                serviciosModal.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+            
+            serviciosModal.addEventListener('click', function(e) {
+                if (e.target === serviciosModal) {
+                    serviciosModal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+            
+            // Funcionalidad para pantallas pequeñas (móvil)
+            menuToggle.addEventListener('click', function() {
+                this.classList.toggle('active');
+                mobileModal.classList.toggle('active');
+                
+                if (mobileModal.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                    // Cerrar el submenú si está abierto cuando cerramos el menú principal
+                    servicesSubmenu.classList.remove('open');
+                    serviciosBtnMobile.classList.remove('dropdown-active');
+                }
+            });
+            
+            // Abrir/cerrar submenú de servicios en móvil
+            serviciosBtnMobile.addEventListener('click', function(e) {
+                e.preventDefault();
+                servicesSubmenu.classList.toggle('open');
+                this.classList.toggle('dropdown-active');
+            });
+            
+            // Cerrar modales con Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (serviciosModal.classList.contains('active')) {
+                        serviciosModal.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                    
+                    if (mobileModal.classList.contains('active')) {
+                        menuToggle.classList.remove('active');
+                        mobileModal.classList.remove('active');
+                        document.body.style.overflow = '';
+                        servicesSubmenu.classList.remove('open');
+                        serviciosBtnMobile.classList.remove('dropdown-active');
+                    }
+                }
+            });
+            
+            // Permitir cerrar el modal móvil al hacer clic fuera del contenido
+            mobileModal.addEventListener('click', function(e) {
+                if (e.target === mobileModal) {
+                    menuToggle.classList.remove('active');
+                    this.classList.remove('active');
+                    document.body.style.overflow = '';
+                    servicesSubmenu.classList.remove('open');
+                    serviciosBtnMobile.classList.remove('dropdown-active');
+                }
+            });
+            
+            // Evitar que los clics dentro del contenido del modal móvil cierren el modal
+            mobileModal.querySelector('.modal-content').addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Gestionar el cambio de tamaño de la ventana
+            window.addEventListener('resize', function() {
+                if (checkScreenSize()) {
+                    // Si cambiamos a pantalla grande, cerrar menú móvil
+                    if (mobileModal.classList.contains('active')) {
+                        menuToggle.classList.remove('active');
+                        mobileModal.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                } else {
+                    // Si cambiamos a pantalla pequeña, cerrar modal de servicios
+                    if (serviciosModal.classList.contains('active')) {
+                        serviciosModal.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

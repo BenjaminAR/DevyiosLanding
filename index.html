@@ -1,168 +1,733 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="public/styles/index.css">
-  <title>DEVYIOS Donut</title>
-  <style>
-    body { 
-      margin: 0; 
-      overflow: hidden; 
-      background: #000; 
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    canvas { display: block; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devyios | Inicio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="public/styles/index.css">
+    <link rel="shortcut icon" href="public/img/logo/LogoDevyio.ico" type="image/x-icon">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000000;
+        }
+        canvas {
+            display: block;
+        }
+        #info {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: #555;
+            font-family: Arial, sans-serif;
+            pointer-events: none;
+            font-size: 9pt;
+        }
+        header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 96%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            
+            box-sizing: border-box;
+            z-index: 100;
+        }
+        header p {
+            color: azure;
+            font-weight: 800;
+            font-size: 20pt;
+            margin: 0;
+            font-family: 'Syne', sans-serif;
+        }
+        nav {
+            color: whitesmoke;
+        }
+        nav ul {
+            display: flex;
+            list-style: none;
+            font-weight: 600;
+            font-size: 16pt;
+            margin: 0;
+            padding: 0;
+        }
+        nav ul li {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js"
-      }
-    }
-  </script>
 
-  <script type="module">
-    import * as THREE from 'three';
+      <!-- Header para pantallas grandes (> 819px) -->
+      <header class="header">
+        <p>DEVYIOS</p>
+        <nav class="navbar">
+            <ul>
+                <li><a href="#">Productos</a></li>
+                <li><a href="#" id="servicios-btn-desktop">Servicios</a></li>
+                <li><a href="#">Sobre Nosotros</a></li>
+                <li><a href="#">Contacto</a></li>
+                <li><a href="#">login</a></li>
+            </ul>
+        </nav>
+    </header>
 
-    // Configuración de la escena
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
+    <!-- Modal para pantallas grandes -->
+    <div class="modal" id="servicios-modal">
+        <button class="close-modal" id="close-modal">&times;</button>
+        <div class="modal-content">
+            <h2 class="modal-title">Nuestros Servicios</h2>
+            <ul class="services-list">
+                <li><a href="#">Soporte Técnico</a></li>
+                <li><a href="#">Asesoría en Ciberseguridad</a></li>
+                <li><a href="#">Diseño Web</a></li>
+                <li><a href="#">Programación</a></li>
+                <li><a href="#">Automatización de Procesos Informáticos</a></li>
+                <li><a href="#">Encuestas</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Header para móvil (<= 819px) -->
+    <header class="mobile-header">
+        <a href="#" class="logo">DEVYIOS</a>
+        <button class="menu-toggle" id="menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    <!-- Modal para móvil -->
+    <div class="modal mobile-modal" id="mobile-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Menú</h2>
+            <ul class="main-menu">
+                <li><a href="#">Inicio</a></li>
+                <li><a href="#" id="servicios-btn-mobile">Servicios <i class="fas fa-chevron-down dropdown-indicator"></i></a>
+                    <ul class="services-submenu" id="services-submenu">
+                        <li><a href="#">Soporte Técnico</a></li>
+                        <li><a href="#">Asesoría en Ciberseguridad</a></li>
+                        <li><a href="#">Diseño Web</a></li>
+                        <li><a href="#">Programación</a></li>
+                        <li><a href="#">Automatización de Procesos</a></li>
+                        <li><a href="#">Encuestas</a></li>
+                    </ul>
+                </li>
+                <li><a href="#">Sobre Nosotros</a></li>
+                <li><a href="#">Contacto</a></li>
+            </ul>
+        </div>
+    </div>
+
+
+
+    <div id="info">Mueve el mouse/toca la pantalla para interactuar | Rueda del mouse para zoom</div>
     
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 10;
-    
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 
-    // Función para crear la textura del texto cuando las fuentes estén cargadas
-    async function createTorusWithText() {
-      // Asegurar que la fuente esté cargada
-      await document.fonts.load('800 10px "Syne"');
-      
-      // Crear un canvas grande para la textura
-      const canvas = document.createElement('canvas');
-      canvas.width = 2048;
-      canvas.height = 1024;
-      const ctx = canvas.getContext('2d');
-      
-      // Fondo negro
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Configurar el texto
-      const text = 'DEVYIOS';
-      ctx.font = '800 200px Syne';
-      ctx.fillStyle = '#FFFFFF';
-      ctx.textBaseline = 'middle';
-      
-      // Crear un efecto similar al de la imagen de referencia
-      // Primero dibujamos un borde rojo sutil para simular aberración cromática
-      ctx.shadowColor = '#26e2ff';
-      ctx.shadowBlur = 5;
-      ctx.shadowOffsetX = 3;
-      ctx.shadowOffsetY = 0;
-      
-      // Medir el texto para espaciado adecuado
-      const textWidth = ctx.measureText(text).width;
-      const spacing = textWidth * 1.03; // Reducimos el espaciado para más densidad
-      const rows = 7;
-      
-      // Dibujar el texto en un patrón que llene toda la superficie
-      for (let row = 0; row < rows; row++) {
-        const y = (canvas.height / rows) * (row + 0.5);
-        
-        // Desplazamiento alternado para cada fila
-        const rowOffset = (row % 2) * (spacing / 2);
-        
-        // Dibujamos el texto repetidamente en cada fila
-        for (let i = -1; i < (canvas.width / spacing) + 1; i++) {
-          const x = (i * spacing) + rowOffset;
-          ctx.fillText(text, x, y);
-        }
-      }
-      
-      // Ahora dibujamos un borde azul sutil para completar el efecto
-      ctx.shadowColor = '#dd00ff';
-      ctx.shadowBlur = 5;
-      ctx.shadowOffsetX = -3;
-      ctx.shadowOffsetY = 0;
-      
-      // Repetimos el dibujo para el efecto de borde azul
-      for (let row = 0; row < rows; row++) {
-        const y = (canvas.height / rows) * (row + 0.5);
-        const rowOffset = (row % 2) * (spacing / 2);
-        
-        for (let i = -1; i < (canvas.width / spacing) + 1; i++) {
-          const x = (i * spacing) + rowOffset;
-          ctx.fillText(text, x, y);
-        }
-      }
-      
-      // Crear la textura de Three.js
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.wrapT = THREE.RepeatWrapping;
-      
-      // Geometría del toro más achatada como en la imagen de referencia
-      const geometry = new THREE.TorusGeometry(3.5, 1.7, 96, 384);
-      
-      // Ajuste de coordenadas UV para distribuir el texto correctamente
-      const uvs = geometry.attributes.uv;
-      for (let i = 0; i < uvs.count; i++) {
-        const u = uvs.getX(i);
-        const v = uvs.getY(i);
-        
-        // Estos multiplicadores controlan la densidad del texto
-        uvs.setXY(i, u * 2.5, v * 1.2);
-      }
-      uvs.needsUpdate = true;
-      
-      // Material simple
-      const material = new THREE.MeshBasicMaterial({
-        map: texture,
-        side: THREE.DoubleSide
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          // Elementos del menú de escritorio
+          const serviciosBtnDesktop = document.getElementById('servicios-btn-desktop');
+          const serviciosModal = document.getElementById('servicios-modal');
+          const closeModal = document.getElementById('close-modal');
+          
+          // Elementos del menú móvil
+          const menuToggle = document.getElementById('menu-toggle');
+          const mobileModal = document.getElementById('mobile-modal');
+          const serviciosBtnMobile = document.getElementById('servicios-btn-mobile');
+          const servicesSubmenu = document.getElementById('services-submenu');
+          
+          // Comprobar el tamaño de la pantalla
+          const checkScreenSize = function() {
+              return window.innerWidth > 819;
+          };
+          
+          // Funcionalidad para pantallas grandes
+          serviciosBtnDesktop.addEventListener('click', function(e) {
+              e.preventDefault();
+              if (checkScreenSize()) {
+                  serviciosModal.classList.add('active');
+                  document.body.style.overflow = 'hidden';
+              }
+          });
+          
+          closeModal.addEventListener('click', function() {
+              serviciosModal.classList.remove('active');
+              document.body.style.overflow = '';
+          });
+          
+          serviciosModal.addEventListener('click', function(e) {
+              if (e.target === serviciosModal) {
+                  serviciosModal.classList.remove('active');
+                  document.body.style.overflow = '';
+              }
+          });
+          
+          // Funcionalidad para pantallas pequeñas (móvil)
+          menuToggle.addEventListener('click', function() {
+              this.classList.toggle('active');
+              mobileModal.classList.toggle('active');
+              
+              if (mobileModal.classList.contains('active')) {
+                  document.body.style.overflow = 'hidden';
+              } else {
+                  document.body.style.overflow = '';
+                  // Cerrar el submenú si está abierto cuando cerramos el menú principal
+                  servicesSubmenu.classList.remove('open');
+                  serviciosBtnMobile.classList.remove('dropdown-active');
+              }
+          });
+          
+          // Abrir/cerrar submenú de servicios en móvil
+          serviciosBtnMobile.addEventListener('click', function(e) {
+              e.preventDefault();
+              servicesSubmenu.classList.toggle('open');
+              this.classList.toggle('dropdown-active');
+          });
+          
+          // Cerrar modales con Escape
+          document.addEventListener('keydown', function(e) {
+              if (e.key === 'Escape') {
+                  if (serviciosModal.classList.contains('active')) {
+                      serviciosModal.classList.remove('active');
+                      document.body.style.overflow = '';
+                  }
+                  
+                  if (mobileModal.classList.contains('active')) {
+                      menuToggle.classList.remove('active');
+                      mobileModal.classList.remove('active');
+                      document.body.style.overflow = '';
+                      servicesSubmenu.classList.remove('open');
+                      serviciosBtnMobile.classList.remove('dropdown-active');
+                  }
+              }
+          });
+          
+          // Permitir cerrar el modal móvil al hacer clic fuera del contenido
+          mobileModal.addEventListener('click', function(e) {
+              if (e.target === mobileModal) {
+                  menuToggle.classList.remove('active');
+                  this.classList.remove('active');
+                  document.body.style.overflow = '';
+                  servicesSubmenu.classList.remove('open');
+                  serviciosBtnMobile.classList.remove('dropdown-active');
+              }
+          });
+          
+          // Evitar que los clics dentro del contenido del modal móvil cierren el modal
+          mobileModal.querySelector('.modal-content').addEventListener('click', function(e) {
+              e.stopPropagation();
+          });
+          
+          // Gestionar el cambio de tamaño de la ventana
+          window.addEventListener('resize', function() {
+              if (checkScreenSize()) {
+                  // Si cambiamos a pantalla grande, cerrar menú móvil
+                  if (mobileModal.classList.contains('active')) {
+                      menuToggle.classList.remove('active');
+                      mobileModal.classList.remove('active');
+                      document.body.style.overflow = '';
+                  }
+              } else {
+                  // Si cambiamos a pantalla pequeña, cerrar modal de servicios
+                  if (serviciosModal.classList.contains('active')) {
+                      serviciosModal.classList.remove('active');
+                      document.body.style.overflow = '';
+                  }
+              }
+          });
       });
-      
-      const torus = new THREE.Mesh(geometry, material);
-      // Rotar para que se vea similar a la imagen de referencia
-      torus.rotation.x = 0.2;
-      torus.rotation.y = -0.4;
-      scene.add(torus);
-      
-      // Animar la dona
-      function animate() {
-        requestAnimationFrame(animate);
-        
-        // Rotación lenta para ver el efecto completo
-        torus.rotation.y += 0.003;
-        torus.rotation.x += 0.001;
-        
-        texture.offset.y -= 0.0005;
-        
-        renderer.render(scene, camera);
-      }
-      
-      animate();
-    }
+    </script>
 
-    createTorusWithText();
-    
-    // Ajustar al tamaño de la ventana
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-  </script>
+    <script>
+        // Esperar a que todo se cargue
+        window.addEventListener('load', init);
+        
+        function init() {
+            // Configuración básica
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+            
+            const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, 20);
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.body.appendChild(renderer.domElement);
+            
+            // Iluminación
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 10, 10);
+            scene.add(directionalLight);
+            
+            const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight2.position.set(-5, -5, 8);
+            scene.add(directionalLight2);
+            
+            // Grupo para contener todo
+            const mainGroup = new THREE.Group();
+            scene.add(mainGroup);
+            
+            // Grupo para el logo
+            const logoGroup = new THREE.Group();
+            mainGroup.add(logoGroup);
+            
+            // Colores del logo
+            const colors = {
+                lightBlue: 0x00b8e0,     // Azul claro superior
+                darkBlue: 0x00567a,      // Azul oscuro izquierdo
+                mediumBlue: 0x0097c0,    // Azul medio frontal
+                lightCyan: 0x70d3e2,     // Azul cyan inferior
+                lightGray: 0xe1e1df,     // Gris claro derecho
+                opacityBlue: 0x006594,   // Azul panel abajo izq
+            };
+            
+            // Función para crear forma con esquinas redondeadas
+            function createRoundedShape(points, cornerRadius) {
+                const shape = new THREE.Shape();
+                
+                if (points.length < 3) return shape;
+                
+                // Para cada punto, calculamos la dirección hacia y desde ese punto
+                const smoothedPoints = [];
+                
+                for (let i = 0; i < points.length; i++) {
+                    const current = points[i];
+                    const prev = points[(i - 1 + points.length) % points.length];
+                    const next = points[(i + 1) % points.length];
+                    
+                    // Vectores de dirección
+                    const fromPrev = {
+                        x: current.x - prev.x,
+                        y: current.y - prev.y
+                    };
+                    
+                    const toNext = {
+                        x: next.x - current.x,
+                        y: next.y - current.y
+                    };
+                    
+                    // Normalizar vectores
+                    const lenFromPrev = Math.sqrt(fromPrev.x * fromPrev.x + fromPrev.y * fromPrev.y);
+                    fromPrev.x /= lenFromPrev;
+                    fromPrev.y /= lenFromPrev;
+                    
+                    const lenToNext = Math.sqrt(toNext.x * toNext.x + toNext.y * toNext.y);
+                    toNext.x /= lenToNext;
+                    toNext.y /= lenToNext;
+                    
+                    // Limitar el radio de esquina al 40% de la longitud del segmento más corto
+                    const actualRadius = Math.min(
+                        cornerRadius,
+                        lenFromPrev * 0.4,
+                        lenToNext * 0.4
+                    );
+                    
+                    // Puntos de control para esta esquina
+                    smoothedPoints.push({
+                        point: current,
+                        fromPrevPoint: {
+                            x: current.x - fromPrev.x * actualRadius,
+                            y: current.y - fromPrev.y * actualRadius
+                        },
+                        toNextPoint: {
+                            x: current.x + toNext.x * actualRadius,
+                            y: current.y + toNext.y * actualRadius
+                        },
+                        radius: actualRadius
+                    });
+                }
+                
+                // Mover al primer punto de inicio (fin del redondeo del último punto)
+                shape.moveTo(smoothedPoints[0].fromPrevPoint.x, smoothedPoints[0].fromPrevPoint.y);
+                
+                // Dibujar todas las curvas y líneas
+                for (let i = 0; i < smoothedPoints.length; i++) {
+                    const current = smoothedPoints[i];
+                    const next = smoothedPoints[(i + 1) % smoothedPoints.length];
+                    
+                    // Curva en la esquina actual
+                    shape.quadraticCurveTo(
+                        current.point.x, current.point.y,
+                        current.toNextPoint.x, current.toNextPoint.y
+                    );
+                    
+                    // Línea recta hasta la siguiente curva
+                    shape.lineTo(next.fromPrevPoint.x, next.fromPrevPoint.y);
+                }
+                
+                return shape;
+            }
+
+            // Función para crear geometrías de panel
+            function createPanelGeometry(points, depth, cornerRadius) {
+                const shape = createRoundedShape(points, cornerRadius);
+                
+                return new THREE.ExtrudeGeometry(shape, {
+                    depth: depth,
+                    bevelEnabled: false
+                });
+            }
+
+            // Panel superior azul claro
+            const topPanelPoints = [
+                { x: -0.5, y: 3.5 },    // Centro superior
+                { x: -2.6, y: 2.5 },    // Izquierda
+                { x: -0.5, y: 1.7 },    // Centro inferior
+                { x: 1, y: 3 }          // Derecha
+            ];
+            const topPanelGeometry = createPanelGeometry(topPanelPoints, 0.5, 0.3);
+            const topPanelMaterial = new THREE.MeshPhongMaterial({ 
+                color: colors.lightBlue,
+                flatShading: false,
+                shininess: 80
+            });
+            
+            const topPanel = new THREE.Mesh(topPanelGeometry, topPanelMaterial);
+            topPanel.position.z = -0.7;
+            topPanel.position.y = 0.1;
+            logoGroup.add(topPanel);
+            
+            // Panel izquierdo abajo azul
+            const leftPaneldownPoints = [
+                { x: 2.4, y: 0.8 },
+                { x: 2.4, y: 5.6 },
+                { x: 0.8, y: 2 },
+                { x: 0.5, y: 1.5 }      
+            ];
+            const leftPaneldownGeometry = createPanelGeometry(leftPaneldownPoints, 0.5, 0.3);
+            const leftPaneldownMaterial = new THREE.MeshPhongMaterial({ 
+                color: colors.opacityBlue,
+                flatShading: false,
+                shininess: 50
+            });
+            const leftPaneldown = new THREE.Mesh(leftPaneldownGeometry, leftPaneldownMaterial);
+            leftPaneldown.position.z = -0.7;
+            leftPaneldown.position.x = -3.1;
+            leftPaneldown.position.y = -4.1;
+            logoGroup.add(leftPaneldown);
+
+            // Panel izquierdo azul oscuro
+            const leftPanelPoints = [
+                { x: -2.4, y: -0.8 },   // Superior
+                { x: -2.4, y: -5.6 },   // Inferior
+                { x: -0.8, y: -2 },     // Centro inferior
+                { x: -0.5, y: -1.5 }    // Centro superior
+            ];
+            const leftPanelGeometry = createPanelGeometry(leftPanelPoints, 0.5, 0.3);
+            const leftPanelMaterial = new THREE.MeshPhongMaterial({ 
+                color: colors.darkBlue,
+                flatShading: false,
+                shininess: 50
+            });
+            const leftPanel = new THREE.Mesh(leftPanelGeometry, leftPanelMaterial);
+            leftPanel.position.z = -0.7;
+            leftPanel.position.x = -0.2;
+            leftPanel.position.y = 3;
+            logoGroup.add(leftPanel);
+
+            // Panel frontal azul medio
+            const frontPanelPoints = [
+                { x: 1.8, y: -0.1 },    // Superior
+                { x: 1.75, y: -4.9 },   // Medio superior
+                { x: 2.6, y: -5.4 },    // Inferior
+                { x: 3.5, y: -4.9 },    // Derecha inferior
+                { x: 3.5, y: 1.5 }      // Derecha superior
+            ];
+            const frontPanelGeometry = createPanelGeometry(frontPanelPoints, 0.4, 0.3);
+            const frontPanelMaterial = new THREE.MeshPhongMaterial({ 
+                color: colors.mediumBlue,
+                flatShading: false,
+                shininess: 50
+            });
+            const frontPanel = new THREE.Mesh(frontPanelGeometry, frontPanelMaterial);
+            frontPanel.position.x = -2.1;
+            frontPanel.position.z = -0.7;
+            frontPanel.position.y = 1.5;
+            logoGroup.add(frontPanel);
+
+            // Panel derecho gris claro
+            const rightPanelPoints = [
+                { x: 1.8, y: 3 },      // Superior izquierda
+                { x: 1.8, y: -1 },     // Inferior izquierda
+                { x: 3.5, y: -2 },     // Inferior derecha
+                { x: 3.5, y: 1.5 }     // Superior derecha
+            ];
+            const rightPanelGeometry = createPanelGeometry(rightPanelPoints, 0.4, 0.3);
+            const rightPanelMaterial = new THREE.MeshPhongMaterial({ 
+                color: colors.lightGray,
+                flatShading: false,
+                shininess: 50
+            });
+            const rightPanel = new THREE.Mesh(rightPanelGeometry, rightPanelMaterial);
+            rightPanel.position.z = -0.7;
+            rightPanel.position.x = 0.2;
+            logoGroup.add(rightPanel);
+            
+            // Panel inferior azul cyan
+            const bottomPanelPoints = [
+                { x: 1.4, y: -3.2 },   // Izquierda superior
+                { x: 1.4, y: -1.9 },   // Izquierda inferior
+                { x: 1.4, y: -1 },     // Centro
+                { x: 3.4, y: -2.2 }    // Derecha
+            ];
+            
+            const bottomPanelGeometry = createPanelGeometry(bottomPanelPoints, 0.4, 0.3);
+            const bottomPanelMaterial = new THREE.MeshPhongMaterial({ 
+                color: colors.lightCyan,
+                flatShading: false,
+                shininess: 50   
+            });
+            
+            const bottomPanel = new THREE.Mesh(bottomPanelGeometry, bottomPanelMaterial);
+            bottomPanel.position.z = -0.7;
+            bottomPanel.position.y = -0.15;
+            logoGroup.add(bottomPanel);
+            
+            // Ajustes de posición del logo
+            logoGroup.position.y = 0;
+            logoGroup.rotation.x = -0.1;
+            logoGroup.scale.set(0.7, 0.7, 0.7); // Logo más pequeño para que encaje con la dona
+            
+            // ---- CREAR LA DONA QUE RODEA EL LOGO ----
+            
+            // Canvas para la textura de la dona
+            const canvas = document.createElement('canvas');
+            canvas.width = 4096;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            
+            // Fondo transparente para la textura
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Texto y estilo
+            const text = 'DEVYIOS';
+            ctx.font = '800 180px "Syne"';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Efecto de aberración cromática
+            ctx.shadowBlur = 15;
+            
+            // Calculamos dimensiones exactas
+            const textWidth = ctx.measureText(text).width;
+            const horizontalSpacing = textWidth * 1.090;
+            const rowCount = 7;
+            const rowHeight = canvas.height / rowCount;
+            
+            // Aplicar efecto cyan
+            ctx.shadowColor = '#26e2ff';
+            ctx.shadowOffsetX = 3;
+            ctx.shadowOffsetY = 0;
+            
+            // Dibujamos filas de texto con desplazamiento alternado
+            for (let row = 0; row < rowCount; row++) {
+                const y = rowHeight * (row + 0.5);
+                const xOffset = (row % 2) ? horizontalSpacing / 2 : 0;
+                
+                const repetitions = Math.ceil(canvas.width / horizontalSpacing) + 1;
+                
+                for (let i = 0; i < repetitions; i++) {
+                    const x = (i * horizontalSpacing) + xOffset;
+                    ctx.fillText(text, x, y);
+                }
+            }
+            
+            // Aplicar efecto magenta
+            ctx.shadowColor = '#dd00ff';
+            ctx.shadowOffsetX = -3;
+            ctx.shadowOffsetY = 0;
+            
+            // Repetir el dibujo para el efecto magenta
+            for (let row = 0; row < rowCount; row++) {
+                const y = rowHeight * (row + 0.5);
+                const xOffset = (row % 2) ? horizontalSpacing / 2 : 0;
+                
+                const repetitions = Math.ceil(canvas.width / horizontalSpacing) + 1;
+                
+                for (let i = 0; i < repetitions; i++) {
+                    const x = (i * horizontalSpacing) + xOffset;
+                    ctx.fillText(text, x, y);
+                }
+            }
+            
+            // Crear la textura para la dona
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(1, 1);
+            
+            // Geometría del toro más delgada para no ocultar el logo
+            const torusGeometry = new THREE.TorusGeometry(7.5, 1.2, 64, 350);
+            
+            // Ajustar UV mapping para la dona
+            const uvAttribute = torusGeometry.attributes.uv;
+            
+            for (let i = 0; i < uvAttribute.count; i++) {
+                let u = uvAttribute.getX(i);
+                let v = uvAttribute.getY(i);
+                
+                u = u * 2;
+                v = v * 2;
+                
+                uvAttribute.setXY(i, u, v);
+            }
+            
+            uvAttribute.needsUpdate = true;
+            
+            // Material de la dona
+            const torusMaterial = new THREE.MeshBasicMaterial({
+                map: texture,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 1 // Hacer la dona ligeramente transparente
+            });
+            
+            const torus = new THREE.Mesh(torusGeometry, torusMaterial);
+            torus.rotation.x = Math.PI / 2 - 0.2; // Colocar dona en plano horizontal
+            mainGroup.add(torus);
+            
+            // Animación de entrada del logo
+            logoGroup.scale.set(0, 0, 0);
+            gsap.to(logoGroup.scale, {
+                x: 0.7, 
+                y: 0.7, 
+                z: 0.7, 
+                duration: 1.2, 
+                ease: "back.out(1.7)",
+                onComplete: () => {
+                    // Pequeña animación después de la entrada
+                    gsap.to(logoGroup.rotation, {
+                        y: Math.PI * 0.5,
+                        duration: 1.5,
+                        ease: "power2.inOut"
+                    });
+                }
+            });
+            
+            // Variables para interactividad
+            let isDragging = false;
+            let previousMousePosition = {
+                x: 0,
+                y: 0
+            };
+            
+            // Eventos del mouse
+            document.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+            }, false);
+            
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const deltaMove = {
+                        x: e.clientX - previousMousePosition.x,
+                        y: e.clientY - previousMousePosition.y
+                    };
+                    
+                    mainGroup.rotation.y += deltaMove.x * 0.01;
+                    mainGroup.rotation.x += deltaMove.y * 0.01;
+                    
+                    previousMousePosition = {
+                        x: e.clientX,
+                        y: e.clientY
+                    };
+                }
+            }, false);
+            
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            }, false);
+            
+            // Zoom con rueda de ratón
+            document.addEventListener('wheel', (e) => {
+                camera.position.z += e.deltaY * 0.01;
+                // Limitar el zoom
+                if (camera.position.z < 10) camera.position.z = 10;
+                if (camera.position.z > 30) camera.position.z = 30;
+            }, false);
+            
+            // Eventos táctiles
+            document.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    previousMousePosition = {
+                        x: e.touches[0].clientX,
+                        y: e.touches[0].clientY
+                    };
+                }
+            }, false);
+            
+            document.addEventListener('touchmove', (e) => {
+                if (isDragging && e.touches.length === 1) {
+                    const deltaMove = {
+                        x: e.touches[0].clientX - previousMousePosition.x,
+                        y: e.touches[0].clientY - previousMousePosition.y
+                    };
+                    
+                    mainGroup.rotation.y += deltaMove.x * 0.01;
+                    mainGroup.rotation.x += deltaMove.y * 0.01;
+                    
+                    previousMousePosition = {
+                        x: e.touches[0].clientX,
+                        y: e.touches[0].clientY
+                    };
+                }
+            }, false);
+            
+            document.addEventListener('touchend', () => {
+                isDragging = false;
+            }, false);
+            
+            // Redimensionamiento
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }, false);
+            
+            // Auto-rotación suave
+            let autoRotate = true;
+            
+            // Función de animación
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                if (!isDragging && autoRotate) {
+                    mainGroup.rotation.y += 0.002;
+                    
+                    // Rotación independiente de la dona
+                    torus.rotation.z += 0.003;
+                    
+                    // Movimiento de textura de la dona
+                    texture.offset.y -= 0.0005;
+                }
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+
+        }
+    </script>
 </body>
 </html>
