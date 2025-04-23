@@ -516,13 +516,13 @@
             
             // Texto y estilo
             const text = 'DEVYIOS';
-            ctx.font = '800 180px "Syne"';
+            ctx.font = '800 190px "Syne"';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
             // Efecto de aberración cromática
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 35;
             
             // Calculamos dimensiones exactas
             const textWidth = ctx.measureText(text).width;
@@ -595,7 +595,7 @@
                 map: texture,
                 side: THREE.DoubleSide,
                 transparent: true,
-                opacity: 1 // Hacer la dona ligeramente transparente
+                opacity: 1.5 // Hacer la dona ligeramente transparente
             });
             
             const torus = new THREE.Mesh(torusGeometry, torusMaterial);
