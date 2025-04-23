@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-mx">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -501,7 +501,7 @@
             // Ajustes de posición del logo
             logoGroup.position.y = 0;
             logoGroup.rotation.x = -0.1;
-            logoGroup.scale.set(0.7, 0.7, 0.7); // Logo más pequeño para que encaje con la dona
+            logoGroup.scale.set(3, 3, 3); // Logo más pequeño para que encaje con la dona
             
             // ---- CREAR LA DONA QUE RODEA EL LOGO ----
             
@@ -519,7 +519,7 @@
             ctx.font = '800 190px "Syne"';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
+            ctx.textBaseline = 'middle';
             
             // Efecto de aberración cromática
             ctx.shadowBlur = 35;
@@ -573,7 +573,7 @@
             texture.repeat.set(1, 1);
             
             // Geometría del toro más delgada para no ocultar el logo
-            const torusGeometry = new THREE.TorusGeometry(7.5, 1.2, 64, 350);
+            const torusGeometry = new THREE.TorusGeometry(6.8, 1.6, 64, 350);
             
             // Ajustar UV mapping para la dona
             const uvAttribute = torusGeometry.attributes.uv;
@@ -605,9 +605,9 @@
             // Animación de entrada del logo
             logoGroup.scale.set(0, 0, 0);
             gsap.to(logoGroup.scale, {
-                x: 0.7, 
-                y: 0.7, 
-                z: 0.7, 
+                x: 1, 
+                y: 1, 
+                z: 1, 
                 duration: 1.2, 
                 ease: "back.out(1.7)",
                 onComplete: () => {
